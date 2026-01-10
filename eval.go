@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"slices"
@@ -1016,6 +1017,7 @@ func (e *callExpr) eval(app *app, _ []string) {
 		"load",
 		"push",
 		"redraw",
+		"shuffle",
 		"source",
 		"sync",
 		"tty-write",
@@ -1638,6 +1640,15 @@ func (e *callExpr) eval(app *app, _ []string) {
 			if getSortBy(d.path) == customSort {
 				d.sort()
 			}
+		}
+	case "shuffle":
+		d := app.nav.currDir()
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		for _, f := range d.allFiles {
+			f.customInfo = strconv.Itoa(r.Intn(1 << 31))
+		}
+		if getSortBy(d.path) == customSort {
+			d.sort()
 		}
 	case "calcdirsize":
 		err := app.nav.calcDirSize()

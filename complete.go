@@ -408,7 +408,7 @@ func completeCmd(s string) (matches []compMatch, longest string) {
 		case "sizeunits":
 			matches, longest = matchWord(f[2], []string{"binary", "decimal"})
 		case "sortby":
-			matches, longest = matchWord(f[2], []string{"atime", "btime", "ctime", "custom", "ext", "name", "natural", "size", "time"})
+			matches, longest = matchWord(f[2], []string{"atime", "btime", "ctime", "custom", "ext", "name", "natural", "random", "size", "time"})
 		case "terminalcursor":
 			matches, longest = matchWord(f[2], []string{"default", "block", "underline", "bar", "blinkblock", "blinkunderline", "blinkbar"})
 		default:
@@ -432,7 +432,7 @@ func completeCmd(s string) (matches []compMatch, longest string) {
 		case "info":
 			matches, longest = matchList(f[3], []string{"atime", "btime", "ctime", "custom", "group", "perm", "size", "time", "user"})
 		case "sortby":
-			matches, longest = matchWord(f[3], []string{"atime", "btime", "ctime", "custom", "ext", "name", "natural", "size", "time"})
+			matches, longest = matchWord(f[3], []string{"atime", "btime", "ctime", "custom", "ext", "name", "natural", "random", "size", "time"})
 		default:
 			if slices.Contains(gLocalOptWords, f[2]+"!") {
 				matches, longest = matchWord(f[3], []string{"false", "true"})

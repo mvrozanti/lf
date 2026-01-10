@@ -15,8 +15,9 @@ import (
 )
 
 type State struct {
-	mutex sync.Mutex
-	data  map[string]string
+	mutex   sync.Mutex
+	data    map[string]string
+	getFiles func() string
 }
 
 var gState State
@@ -54,6 +55,10 @@ func run() {
 	ui := newUI(screen)
 	nav := newNav(ui)
 	app := newApp(ui, nav)
+
+	gState.getFiles = func() string {
+		return listFilesInCurrDir(app.nav)
+	}
 
 	if err := nav.sync(); err != nil {
 		app.ui.echoerrf("sync: %s", err)
@@ -145,7 +150,12 @@ func readExpr() <-chan expr {
 			// running `$lf -remote "query $id <something>"`.
 			if word, rest := splitWord(s.Text()); word == "query" {
 				gState.mutex.Lock()
-				state := gState.data[rest]
+				var state string
+				if rest == "files-fresh" {
+					state = gState.getFiles()
+				} else {
+					state = gState.data[rest]
+				}
 				gState.mutex.Unlock()
 				if _, err := fmt.Fprintln(c, state); err != nil {
 					log.Fatalf("sending response to server: %s", err)

@@ -1946,7 +1946,10 @@ The following types of information are supported:
     cmds     list of commands created by the 'cmd' command
     jumps    contents of the jump list, showing previously visited locations
     history  list of previously executed commands on the command line
-    files    list of files in the currently open directory as displayed by lf, empty if dir is still loading
+    files    list of files in the currently open directory as displayed by lf (cached), empty if dir is still loading
+    files-fresh    list of files in the currently open directory as displayed by lf (computed on-demand), empty if dir is still loading
+
+Note that files uses cached data that is only updated when shell commands are executed (e.g. when using $, %, !, or & prefixes), so it may become stale after operations like shuffle or custom sorting via remote commands. Use files-fresh when you need the current display order immediately, for example when integrating with external tools like image viewers. Use files for performance when the cached data is sufficient.
 
 When listing mappings the characters in the first column are:
 

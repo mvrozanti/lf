@@ -1586,19 +1586,22 @@ func (ui *ui) exportSizes() {
 func anyKey() {
 	fmt.Fprint(os.Stderr, gOpts.waitmsg)
 	defer fmt.Fprintln(os.Stderr)
-	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
 	if err != nil {
-		panic(err)
+		log.Printf("anyKey: open /dev/tty: %s", err)
+		return
 	}
-	defer func() {
-		if err := term.Restore(int(os.Stdin.Fd()), oldState); err != nil {
-			panic(err)
-		}
-	}()
-
+	defer tty.Close()
+	fd := int(tty.Fd())
+	oldState, err := term.MakeRaw(fd)
+	if err != nil {
+		log.Printf("anyKey: MakeRaw: %s", err)
+		return
+	}
+	defer term.Restore(fd, oldState)
 	b := make([]byte, 8)
-	if _, err := os.Stdin.Read(b); err != nil {
-		log.Printf("Failed to read key press: %s", err)
+	if _, err := tty.Read(b); err != nil {
+		log.Printf("anyKey: read: %s", err)
 	}
 }
 

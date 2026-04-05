@@ -159,6 +159,10 @@ func shellKill(cmd *exec.Cmd) error {
 	return cmd.Process.Kill()
 }
 
+func setForegroundPgrp() func() {
+	return func() {}
+}
+
 func setDefaults() {
 	gOpts.cmds["open"] = &execExpr{"&", "%OPENER% %f%"}
 	gOpts.nkeys["e"] = &execExpr{"$", "%EDITOR% %f%"}

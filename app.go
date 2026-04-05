@@ -58,6 +58,7 @@ func newApp(ui *ui, nav *nav) *app {
 			case os.Interrupt:
 			case syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM:
 				app.quit()
+				gRestorePgrp()
 				os.Exit(3)
 				return
 			}

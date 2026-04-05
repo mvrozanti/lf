@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/signal"
 	"os/user"
 	"path/filepath"
 	"runtime"
@@ -153,6 +154,51 @@ func shellKill(cmd *exec.Cmd) error {
 		}
 	}
 	return cmd.Process.Kill()
+}
+
+func setForegroundPgrp() func() {
+	tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
+	if err != nil {
+		return func() {}
+	}
+	defer tty.Close()
+
+	ttyFd := int(tty.Fd())
+	originalPgid, err := unix.IoctlGetInt(ttyFd, unix.TIOCGPGRP)
+	if err != nil {
+		return func() {}
+	}
+
+	signal.Ignore(syscall.SIGTTOU)
+	if err := unix.Setpgid(0, 0); err != nil {
+		signal.Reset(syscall.SIGTTOU)
+		return func() {}
+	}
+	pid := os.Getpid()
+	if err := unix.IoctlSetPointerInt(ttyFd, unix.TIOCSPGRP, pid); err != nil {
+		unix.Setpgid(0, originalPgid)
+		signal.Reset(syscall.SIGTTOU)
+		return func() {}
+	}
+	signal.Reset(syscall.SIGTTOU)
+
+	return func() {
+		signal.Ignore(syscall.SIGTTOU)
+		tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
+		if err != nil {
+			signal.Reset(syscall.SIGTTOU)
+			return
+		}
+		defer tty.Close()
+		ttyFd := int(tty.Fd())
+		current, err := unix.IoctlGetInt(ttyFd, unix.TIOCGPGRP)
+		if err != nil || current != pid {
+			signal.Reset(syscall.SIGTTOU)
+			return
+		}
+		unix.IoctlSetPointerInt(ttyFd, unix.TIOCSPGRP, originalPgid)
+		signal.Reset(syscall.SIGTTOU)
+	}
 }
 
 func setDefaults() {

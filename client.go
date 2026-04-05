@@ -22,11 +22,16 @@ type State struct {
 
 var gState State
 
+var gRestorePgrp func() = func() {}
+
 func init() {
 	gState.data = make(map[string]string)
 }
 
 func run() {
+	gRestorePgrp = setForegroundPgrp()
+	defer gRestorePgrp()
+
 	if gLogPath != "" {
 		f, err := os.OpenFile(gLogPath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o600)
 		if err != nil {

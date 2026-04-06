@@ -359,8 +359,6 @@ func init() {
 		"'":          &callExpr{"mark-load", nil, 1},
 		`"`:          &callExpr{"mark-remove", nil, 1},
 		`r`:          &callExpr{"rename", nil, 1},
-		"<c-n>":      &callExpr{"cmd-history-next", nil, 1},
-		"<c-p>":      &callExpr{"cmd-history-prev", nil, 1},
 
 		"zh": &setExpr{"hidden!", ""},
 		"zr": &setExpr{"reverse!", ""},
